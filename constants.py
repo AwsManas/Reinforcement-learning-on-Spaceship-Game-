@@ -24,6 +24,15 @@ SHOOT_POINTS = 2
 COLLISION_DAMAGE = 30
 MISSPENALTY = 20
 
+INITPOINTS = 100
+
 # Power
 HEALTH_MIN = 10
 HEALTH_MAX = 30
+
+
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+Yellow = (255, 255, 0)
+green = (0, 255, 0)

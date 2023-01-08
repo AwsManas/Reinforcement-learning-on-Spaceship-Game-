@@ -102,10 +102,10 @@ class battleship(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT - 10
         self.speedx = 0
         self.speedy = 0
-        keyspressed = pygame.key.get_pressed()
-        if keyspressed[pygame.K_LEFT]:
+        global action
+        if action == 'move_left':
             self.speedx = -constants.Ship_speed
-        if keyspressed[pygame.K_RIGHT]:
+        elif action == 'move_right':
             self.speedx = constants.Ship_speed
         if self.rect.right >= WIDTH:
             self.rect.right = WIDTH - 1
@@ -299,6 +299,42 @@ running = True
 game_over = True
 firsttime = True
 time_ = ''
+
+
+def reset_game():
+    firsttime = False
+    time_ = datetime.now()
+    game_over = False
+    missed_meteroids = 0
+    all_sprites = pygame.sprite.Group()
+    mobs = pygame.sprite.Group()
+    Bull = pygame.sprite.Group()
+    PWups = pygame.sprite.Group()
+    ship = battleship()
+    all_sprites.add(ship)
+    for i in range(constants.MAX_METEROIDS):
+        m = Mob()
+        mobs.add(m)
+        all_sprites.add(m)
+    points = 10
+
+
+frame_iteration = 0
+actions_list = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
+
+def getaction(act):
+    if act == [1, 0, 0, 0]:
+        return 'move_left'
+    elif act == [0, 1, 0, 0]:
+        return 'move_right'
+    elif act == [0, 0, 1, 0]:
+        return 'fire'
+    elif act == [0, 0, 0, 1]:
+        return 'idle'
+
+
+action = 'idle'
 while running:
     if game_over:
         if not firsttime:
@@ -306,7 +342,7 @@ while running:
                 f.write(str((datetime.now() - time_).total_seconds()))
                 f.write('\n')
                 f.close()
-        first_screen()
+        # first_screen()
         firsttime = False
         time_ = datetime.now()
         game_over = False
@@ -321,19 +357,20 @@ while running:
             m = Mob()
             mobs.add(m)
             all_sprites.add(m)
-        points = 10
+        points = constants.INITPOINTS
     clock.tick(FPS)
     # Events
-
+    act = random.choice(actions_list)  # TODO
+    action = getaction(act)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False
-        elif i.type == pygame.KEYDOWN:
-            if i.key == pygame.K_SPACE:
-                ship.shoot()
-                points -= constants.SHOOT_POINTS
-                if points < 1:
-                    game_over = True
+
+    if action == 'fire':
+        ship.shoot()
+        points -= constants.SHOOT_POINTS
+        if points < 1:
+            game_over = True
 
     all_sprites.update()
 
@@ -344,6 +381,7 @@ while running:
         game_over = True
 
     # check  collision
+    destroyed = False
     hits = pygame.sprite.groupcollide(mobs, Bull, True, True)
     for hit in hits:
         points += constants.HIT_POINTS
@@ -357,6 +395,7 @@ while running:
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
+        destroyed = True
 
     hits = pygame.sprite.spritecollide(
         ship, mobs, True, pygame.sprite.collide_circle)
@@ -376,6 +415,8 @@ while running:
             ship.hide()
             ship.lives -= 1
             ship.health = constants.SHIP_HEALTH
+        destroyed = True
+
     hits = pygame.sprite.spritecollide(ship, PWups, True)
     for hit in hits:  # gun,live
         # power_sound.play()
@@ -396,6 +437,16 @@ while running:
     draw_text(screen, str(points), 20, WIDTH/2, 20)
     draw_health(screen, 0, HEIGHT-7, ship.health)
     draw_lives(screen, WIDTH-75, 5, ship.lives, ship_tag)
+
+    reward = 1
+    if destroyed:
+        reward = 10
+        destroyed = False
+    if game_over and not firsttime:
+        reward = -10
+
+    # Reward to be extracted from here
+
     # Draw where?
     pygame.display.flip()
 pygame.quit()
