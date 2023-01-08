@@ -6,10 +6,10 @@ import os
 
 
 class Linear_Q_net(nn.Module):
-    def __init__(self, input, hidden, output):
+    def __init__(self, input, hidden1, output):
         super().__init__()
-        self.linear1 = nn.Linear(input, hidden)
-        self.linear2 = nn.Linear(hidden, output)
+        self.linear1 = nn.Linear(input, hidden1)
+        self.linear2 = nn.Linear(hidden1, output)
 
     def forward(self, x):
         x = F.relu(self.linear1(x))
@@ -59,5 +59,5 @@ class QTrainer:
 
         self.optimizer.zero_grad()
         loss = self.criterian(target, pred)
-        loss.backwards()
+        loss.backward()
         self.optimizer.step()

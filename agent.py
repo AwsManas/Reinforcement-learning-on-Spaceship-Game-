@@ -3,13 +3,13 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython import display
-from shooterAI import *
+from shooterAI import SpaceshipAI
 
 from collections import deque
 from model import Linear_Q_net, QTrainer
 
-MAX_MEMORY = 100000
-BATCH_SIZE = 1000
+MAX_MEMORY = 400000
+BATCH_SIZE = 2000
 
 LR = 0.001
 
@@ -34,9 +34,9 @@ class Agent:
     def __init__(self):
         self.num_games = 0
         self.epsilon = 0  # randomness
-        self.gamma = 0.8  # discont rate
+        self.gamma = 0.9  # discont rate
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_Q_net(112, 256, 4)
+        self.model = Linear_Q_net(12, 10, 4)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):
@@ -59,7 +59,7 @@ class Agent:
 
     def get_action(self, state):
         # random moves , tradeoff / exploitation
-        self.epsilon = 80 - self.num_games
+        self.epsilon = 100 - self.num_games
         final_move = [0, 0, 0, 0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 3)
@@ -75,7 +75,7 @@ class Agent:
 def train():
     plot_scores = []
     plot_mean = []
-    total_score = 0
+    last_10_score = deque(maxlen=10)
     record = 0
 
     agent = Agent()
@@ -90,8 +90,7 @@ def train():
 
         if done:
             # Train long memory , plot results
-            print()
-            game.reset()
+            game.reset_game()
             agent.num_games += 1
             agent.train_long_memory()
             if score > record:
@@ -99,8 +98,8 @@ def train():
                 agent.model.save_model()
             print(agent.num_games, ' ', score, ' ', record)
             plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.num_games
+            last_10_score.append(score)
+            mean_score = np.sum(last_10_score) / len(last_10_score)
             plot_mean.append(mean_score)
             plot(plot_scores, plot_mean)
 

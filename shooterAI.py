@@ -3,7 +3,7 @@ import random
 import os
 import constants as constants
 from datetime import datetime
-
+from collections import deque
 
 ######## Globals ##########
 action = 'idle'
@@ -296,6 +296,12 @@ class SpaceshipAI:
             self.mobs.add(m)
             all_sprites.add(m)
         self.points = constants.INITPOINTS
+        self.last_5_moves = deque(maxlen=5)
+        self.last_5_moves.append(1)
+        self.last_5_moves.append(2)
+        self.last_5_moves.append(3)
+        self.last_5_moves.append(4)
+        self.last_5_moves.append(5)
 
     def get_states(self):
         states_to_return = []
@@ -306,17 +312,29 @@ class SpaceshipAI:
             ship_pwr_lvl = 2
         states_to_return.append(ship_pwr_lvl)
         states_to_return.append(self.points)
+        left = 0
+        right = 0
+        center = 0
         for met in self.mobs:
-            states_to_return.extend(
-                (met.rect.centerx, met.rect.centery, met.speedx, met.speedy))
-        bullets_at = [-100]*80
+            if met.rect.centerx//5 == self.ship.rect.centerx//5:
+                center = 1
+            elif met.rect.centerx//5 > self.ship.rect.centerx//5:
+                right += 1
+            else:
+                left += 1
+        states_to_return.extend((left, center, right))
+
+        is_bull = -1
         global Bull
         for one_b in Bull:
-            x = one_b.rect.right//5
+            x = one_b.rect.centerx//5
+            x = min(x, 79)
+            x = max(x, 0)
             y = one_b.rect.bottom
-            if y > bullets_at[x]:
-                bullets_at[x] = y
-        states_to_return.extend(bullets_at)
+
+            if x == self.ship.rect.centerx//5 and y > is_bull:
+                is_bull = y
+        states_to_return.append(is_bull)
 
         power_ret = [-100, -100, -100, -100]
         for p in self.PWups:
@@ -407,12 +425,20 @@ class SpaceshipAI:
         draw_lives(self.screen, constants.WIDTH-75,
                    5, self.ship.lives, self.ship_tag)
 
-        reward = 1
+        reward = 0
         if self.destroyed:
             reward = 10
             self.destroyed = False
         if self.game_over == True:
             reward = -10
+
+        self.last_5_moves.append(act)
+        cnt = 0
+        for i in range(5):
+            if self.last_5_moves[i] == act:
+                cnt += 1
+        if cnt == 5:
+            reward = 0
 
         pygame.display.flip()
         self.score = (datetime.now() - self.time_).total_seconds()
