@@ -3,7 +3,11 @@
 Using reinforcement learning to train a Neural Network to learn to play a SpaceShip game.
 
 Training of the model :-
-https://user-images.githubusercontent.com/39924378/211222434-7be745ae-5188-44e8-ba7e-7ab382685e76.mov
+
+
+https://user-images.githubusercontent.com/39924378/211222825-d998537c-04ba-44c7-b6ea-8c344f67dea8.mp4
+
+
 
 Game can be found at (Human input) : https://github.com/AwsManas/SpaceShip-Attack
 
