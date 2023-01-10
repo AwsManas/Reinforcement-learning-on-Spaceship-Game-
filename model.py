@@ -29,7 +29,7 @@ class QTrainer:
         self.lr = lr
         self.model = model
         self.gamma = gamma
-        self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
+        self.optimizer = optim.Adagrad(model.parameters(), lr=self.lr)
         self.criterian = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):

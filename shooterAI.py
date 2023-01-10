@@ -403,7 +403,6 @@ class SpaceshipAI:
                 self.ship.hide()
                 self.ship.lives -= 1
                 self.ship.health = constants.SHIP_HEALTH
-            self.destroyed = True
 
         hits = pygame.sprite.spritecollide(self.ship, self.PWups, True)
         for hit in hits:  # gun,live

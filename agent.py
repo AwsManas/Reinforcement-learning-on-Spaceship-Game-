@@ -11,7 +11,7 @@ from model import Linear_Q_net, QTrainer
 MAX_MEMORY = 400000
 BATCH_SIZE = 2000
 
-LR = 0.001
+LR = 0.1
 
 plt.ion()
 
@@ -36,7 +36,7 @@ class Agent:
         self.epsilon = 0  # randomness
         self.gamma = 0.9  # discont rate
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_Q_net(12, 10, 4)
+        self.model = Linear_Q_net(12, 4, 4)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):
